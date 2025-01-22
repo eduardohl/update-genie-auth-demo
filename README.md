@@ -30,8 +30,22 @@ This repository can _only_ accept contributions directly from Databricks field p
 ---
 &copy; 2024 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the Databricks License [https://databricks.com/db-license-source].  All included or referenced third party libraries are subject to the licenses set forth below.
 
-| library                                | description             | license    | source                                              |
+| library | description | license | source |
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
+| gradio | Python library for creating customizable UI components for ML models | Apache 2.0 | https://github.com/gradio-app/gradio |
+| dash | Framework for building analytical web applications | MIT | https://github.com/plotly/dash |
+| streamlit | Framework for creating data apps with minimal code | Apache 2.0 | https://github.com/streamlit/streamlit |
+| plotly | Interactive graphing library for Python | MIT | https://github.com/plotly/plotly.py |
+| flask | Lightweight WSGI web application framework | BSD 3-Clause | https://github.com/pallets/flask |
+| fastapi | Modern, fast web framework for building APIs with Python | MIT | https://github.com/tiangolo/fastapi |
+| langchain | Framework for developing applications powered by language models | MIT | https://github.com/langchain-ai/langchain |
+| langgraph | Library for building stateful applications with LLMs | MIT | https://github.com/langchain-ai/langgraph |
+| werkzeug | WSGI web application library (Flask dependency) | BSD 3-Clause | https://github.com/pallets/werkzeug |
+| jinja2 | Template engine for Python (Flask dependency) | BSD 3-Clause | https://github.com/pallets/jinja |
+| pydantic | Data validation using Python type annotations (FastAPI dependency) | MIT | https://github.com/pydantic/pydantic |
+| starlette | Lightweight ASGI framework (FastAPI dependency) | BSD 3-Clause | https://github.com/encode/starlette |
+| httpx | Modern HTTP client for Python (FastAPI dependency) | BSD 3-Clause | https://github.com/encode/httpx |
+| uvicorn | Lightning-fast ASGI server (FastAPI dependency) | BSD 3-Clause | https://github.com/encode/uvicorn |
 
 Databricks support doesn't cover this content. For questions or bugs, please open a github issue and the team will help on a best effort basis.
 
