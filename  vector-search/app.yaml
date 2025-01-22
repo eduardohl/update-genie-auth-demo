@@ -1,0 +1,8 @@
+command:
+- gradio
+- app.py
+env:
+- name: VECTOR_SEARCH_ENDPOINT_NAME
+  value: null
+- name: VECTOR_SEARCH_INDEX_NAME
+  value: null
