@@ -47,9 +47,10 @@ It showcases two authentication patterns:
    python app.py
    ```
 
-> [!NOTE]  
-> When running locally, on-behalf-of-user authentication will not work due to the missing `X-Forwarded-Access-Token` header.
-> The service principal authentication section of the app will instead use your user credentials as configured with the CLI,
+> [!NOTE]
+>
+> - When running locally, on-behalf-of-user authentication will not work due to the missing `X-Forwarded-Access-Token` header.
+> - The service principal authentication section of the app will instead use your user credentials as configured with the CLI.
 
 ---
 
