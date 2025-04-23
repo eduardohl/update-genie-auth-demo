@@ -8,7 +8,7 @@ w = WorkspaceClient()
 
 
 def fetch_sp_details():
-    local_sp_display_info = "Unknown"  # Default value
+    local_sp_display_info = "Unknown"
     if w:
         try:
             me = w.current_user.me()
