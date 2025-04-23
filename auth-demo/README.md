@@ -1,13 +1,13 @@
-# Databricks Apps: Service Principal and OBO Authentication Demo
+# Databricks Apps: Service Principal and OBO Authorization Demo
 
-This code sample demonstrates how to use different authentication methods within a [Databricks App](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) to query data from a Databricks SQL Warehouse via Unity Catalog.
+This code sample demonstrates how to use different authorization methods within a [Databricks App](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) to query data from a Databricks SQL Warehouse via Unity Catalog.
 
-It showcases two authentication patterns:
+It showcases two authorization patterns:
 
-1.  **Service Principal (SP) Authentication:** Uses the app's own configured Service Principal credentials (via `DATABRICKS_CLIENT_ID` and `DATABRICKS_CLIENT_SECRET`) to connect and run queries.
-2.  **On-Behalf-Of (OBO) Authentication:** Uses the accessing user's identity by leveraging the `X-Forwarded-Access-Token` header provided by Databricks when OBO is enabled for the app.
+1.  **Service Principal (SP) Authorization:** Uses the app's own configured Service Principal credentials (via `DATABRICKS_CLIENT_ID` and `DATABRICKS_CLIENT_SECRET`) to connect and run queries.
+2.  **On-Behalf-Of (OBO) Authorization:** Uses the accessing user's identity by leveraging the `X-Forwarded-Access-Token` header provided by Databricks when OBO is enabled for the app.
 
-![Databricks Apps: Service Principal and OBO Authentication Demo](assets/screenshot.png "Databricks Apps: Service Principal and OBO Authentication Demo")
+![Databricks Apps: Service Principal and OBO Authorization Demo](assets/screenshot.png "Databricks Apps: Service Principal and OBO Authorization Demo")
 
 ## Deploying as a Databricks App
 
@@ -49,8 +49,8 @@ It showcases two authentication patterns:
 
 > [!NOTE]
 >
-> - When running locally, on-behalf-of-user authentication will not work due to the missing `X-Forwarded-Access-Token` header.
-> - The service principal authentication section of the app will instead use your user credentials as configured with the CLI.
+> - When running locally, on-behalf-of-user authorization will not work due to the missing `X-Forwarded-Access-Token` header.
+> - The service principal authorization section of the app will instead use your user credentials as configured with the CLI.
 
 ---
 
