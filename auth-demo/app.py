@@ -60,7 +60,7 @@ app.layout = dmc.MantineProvider(
                                                 height=28,
                                             ),
                                             dmc.Title(
-                                                "Databricks Apps Authentication Demo",
+                                                "Databricks Apps Authorization Demo",
                                                 order=2,
                                             ),
                                         ],
@@ -128,7 +128,7 @@ app.layout = dmc.MantineProvider(
                                 dmc.Paper(
                                     [
                                         dmc.Title(
-                                            "Service Principal (SP) Authentication",
+                                            "Service Principal (SP) Authorization",
                                             order=3,
                                             mb="md",
                                         ),
@@ -198,7 +198,7 @@ app.layout = dmc.MantineProvider(
                                 dmc.Paper(
                                     [
                                         dmc.Title(
-                                            "On-Behalf-Of User (OBO) Authentication",
+                                            "On-Behalf-Of User (OBO) Authorization",
                                             order=3,
                                             mb="md",
                                         ),
@@ -600,7 +600,7 @@ def run_obo_query_callback(n_clicks, http_path, table_name):
                 html.B(f"{len(df)}"),
                 " rows from ",
                 dmc.Code(f"{table_name}"),
-                " using OBO authentication.",
+                " using OBO authorization.",
             ]
             alert_color = "green"
             alert_title = "Success"
