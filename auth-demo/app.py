@@ -1,6 +1,8 @@
 import dash
 import dash_mantine_components as dmc
 from dash import Dash, Input, Output, State, callback, dcc, html
+import jwt
+import json
 
 from auth import (
     cfg,
@@ -225,6 +227,58 @@ app.layout = dmc.MantineProvider(
                                             mb="md",
                                             radius="sm",
                                         ),
+                                        html.Div(
+                                            id="accordion-container",
+                                            children=dmc.Accordion(
+                                                children=[
+                                                    dmc.AccordionItem(
+                                                        [
+                                                            dmc.AccordionControl(
+                                                                "View Access Token Details",
+                                                                icon=get_icon("material-symbols:key-outline"),
+                                                            ),
+                                                            dmc.AccordionPanel(
+                                                                [
+                                                                    dmc.Stack(
+                                                                        [
+                                                                            dmc.Text("Raw JWT Token:", size="sm", fw=500, mb="xs"),
+                                                                            dmc.ScrollArea(
+                                                                                dmc.Code(
+                                                                                    id="jwt-raw-token",
+                                                                                    children="Token will appear here when available",
+                                                                                    block=True,
+                                                                                    style={"whiteSpace": "pre-wrap", "wordBreak": "break-all"},
+                                                                                ),
+                                                                                h=100,
+                                                                                type="auto",
+                                                                            ),
+                                                                            dmc.Divider(my="md"),
+                                                                            dmc.Text("Decoded JWT Payload:", size="sm", fw=500, mb="xs"),
+                                                                            dmc.ScrollArea(
+                                                                                dmc.Code(
+                                                                                    id="jwt-decoded",
+                                                                                    children="Decoded token will appear here",
+                                                                                    block=True,
+                                                                                    style={"whiteSpace": "pre"},
+                                                                                ),
+                                                                                h=200,
+                                                                                type="auto",
+                                                                            ),
+                                                                            dmc.Divider(my="md"),
+                                                                            dmc.Text("Parsed Scopes:", size="sm", fw=500, mb="xs"),
+                                                                            html.Div(id="jwt-scopes-list"),
+                                                                        ],
+                                                                        gap="sm",
+                                                                    )
+                                                                ]
+                                                            ),
+                                                        ],
+                                                        value="token-details",
+                                                    )
+                                                ],
+                                                mb="md",
+                                            ),
+                                        ),
                                         dmc.Button(
                                             "Run Query (OBO)",
                                             id="run-query-obo",
@@ -293,6 +347,10 @@ app.layout = dmc.MantineProvider(
         Output("sql-http-path", "data"),
         Output("sql-http-path", "value"),
         Output("sp-name-display", "children"),
+        Output("jwt-raw-token", "children"),
+        Output("jwt-decoded", "children"),
+        Output("jwt-scopes-list", "children"),
+        Output("accordion-container", "style"),
     ],
     Input("initial-load-trigger", "children"),
 )
@@ -310,6 +368,10 @@ def update_header_and_warehouses(_):
     obo_disabled = True
     has_token = False
     obo_username = ["Current user: ", html.B("Unknown")]
+    jwt_raw = "No token available"
+    jwt_decoded = "No token to decode"
+    jwt_scopes_list = dmc.Text("No scopes available", size="sm", c="dimmed")
+    accordion_style = {"display": "none"}
 
     try:
         from flask import request
@@ -325,15 +387,59 @@ def update_header_and_warehouses(_):
         ]
 
         has_token = bool(obo_token)
+        has_sql_scope = False
 
         if has_token:
-            obo_status_msg = [
-                dmc.InlineCodeHighlight(code="X-Forwarded-Access-Token"),
-                " FOUND. OBO is available.",
-            ]
-            obo_color = "green"
-            obo_title = "OBO Available"
-            obo_disabled = False
+            # Show accordion when token is present
+            accordion_style = {"display": "block"}
+            
+            # Store the raw JWT
+            jwt_raw = obo_token
+            
+            # Try to decode the JWT
+            try:
+                # Decode without verification (since we don't have the public key)
+                decoded_token = jwt.decode(obo_token, options={"verify_signature": False})
+                jwt_decoded = json.dumps(decoded_token, indent=2)
+                
+                # Parse scopes
+                scopes = decoded_token.get("scope", "").split()
+                
+                # Check if SQL scope is present
+                # Looking for scopes that contain 'sql' (case-insensitive)
+                has_sql_scope = any('sql' in scope.lower() for scope in scopes)
+                
+                if scopes:
+                    jwt_scopes_list = dmc.List(
+                        [dmc.ListItem(dmc.Code(scope)) for scope in scopes],
+                        size="sm",
+                        spacing="xs",
+                    )
+                else:
+                    jwt_scopes_list = dmc.Text("No scopes found in token", size="sm", c="dimmed")
+                    
+            except Exception as e:
+                jwt_decoded = f"Error decoding JWT: {str(e)}"
+                jwt_scopes_list = dmc.Text("Error parsing scopes", size="sm", c="red")
+            
+            # Update OBO status based on SQL scope presence
+            if has_sql_scope:
+                obo_status_msg = [
+                    dmc.InlineCodeHighlight(code="X-Forwarded-Access-Token"),
+                    " found with SQL scope. OBO is properly configured.",
+                ]
+                obo_color = "green"
+                obo_title = "OBO Configured"
+                obo_disabled = False
+            else:
+                obo_status_msg = [
+                    dmc.InlineCodeHighlight(code="X-Forwarded-Access-Token"),
+                    " found but SQL scope is missing. Enable SQL auth scope for this app to use OBO.",
+                ]
+                obo_color = "orange"
+                obo_title = "SQL Scope Missing"
+                obo_disabled = True
+                
         else:
             obo_status_msg = [
                 dmc.InlineCodeHighlight(code="X-Forwarded-Access-Token"),
@@ -375,6 +481,12 @@ def update_header_and_warehouses(_):
         wh_value,
         # Return SP name
         sp_name,
+        # Return JWT details
+        jwt_raw,
+        jwt_decoded,
+        jwt_scopes_list,
+        # Return accordion visibility
+        accordion_style,
     )
 
 

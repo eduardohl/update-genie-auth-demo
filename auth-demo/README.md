@@ -29,22 +29,14 @@ It showcases two authorization patterns:
    git clone https://github.com/databricks-solutions/databricks-apps-examples.git
    cd databricks-apps-examples/auth-demo
    ```
-1. Create and activate a Python virtual environment in this folder [`venv`](https://docs.python.org/3/library/venv.html):
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-1. Install required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+1. Install [uv](https://docs.astral.sh/uv/) if you haven't already.
 1. Install the [Databricks CLI](https://docs.databricks.com/en/dev-tools/cli/index.html) and authenticate with your Databricks workspace using [OAuth U2M](https://docs.databricks.com/en/dev-tools/auth/oauth-u2m.html), for example:
    ```bash
    databricks auth login --host https://my-workspace.cloud.databricks.com/
    ```
-1. Run the app:
+1. Run the app (uv will automatically create a virtual environment and install dependencies):
    ```bash
-   python app.py
+   uv run python app.py
    ```
 
 > [!NOTE]
