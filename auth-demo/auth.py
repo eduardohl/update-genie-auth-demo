@@ -111,13 +111,19 @@ def get_genie_spaces_sp():
         # Check if response has 'spaces' key
         if isinstance(response, dict):
             print(f"DEBUG: Response is dict with keys: {list(response.keys())}")
-            if 'spaces' in response:
+            if len(response) == 0:
+                print("WARNING: SP received empty response - possible permissions issue")
+                print("INFO: Service Principal may not have access to Genie spaces")
+                print("INFO: Check if SP has necessary permissions or if workspace has Genie spaces")
+            elif 'spaces' in response:
                 spaces = response['spaces']
                 print(f"DEBUG: Found {len(spaces)} spaces")
                 for i, space in enumerate(spaces):
                     print(f"DEBUG: Space {i}: {space.get('title', 'No title')} (ID: {space.get('id', 'No ID')})")
+                    print(f"DEBUG: Space {i} keys: {list(space.keys()) if isinstance(space, dict) else 'Not a dict'}")
             else:
                 print("WARNING: No 'spaces' key in response")
+                print(f"DEBUG: Available keys in response: {list(response.keys())}")
         else:
             print(f"WARNING: Response is not a dict: {response}")
             
@@ -180,9 +186,17 @@ def get_genie_spaces_obo(user_token):
                     spaces = json_response['spaces']
                     print(f"DEBUG: Found {len(spaces)} spaces in OBO response")
                     for i, space in enumerate(spaces):
+                        print(f"DEBUG: OBO Space {i} full structure: {space}")
+                        print(f"DEBUG: OBO Space {i} keys: {list(space.keys()) if isinstance(space, dict) else 'Not a dict'}")
                         print(f"DEBUG: OBO Space {i}: {space.get('title', 'No title')} (ID: {space.get('id', 'No ID')})")
+                        # Try alternative ID fields
+                        alt_id = space.get('space_id') or space.get('_id') or space.get('genie_space_id')
+                        if alt_id:
+                            print(f"DEBUG: OBO Space {i} alternative ID found: {alt_id}")
                 else:
                     print("WARNING: OBO response missing 'spaces' key or not a dict")
+                    if isinstance(json_response, dict):
+                        print(f"DEBUG: Available keys in OBO response: {list(json_response.keys())}")
                     
                 print("=" * 60)
                 return json_response
