@@ -49,31 +49,51 @@ def get_connection_obo(http_path, user_token):
 
 def get_genie_spaces_sp():
     """List Genie spaces using Service Principal auth"""
-    url = f"https://{cfg.host}/api/2.0/genie/spaces"
-    headers = {"Authorization": f"Bearer {cfg.authenticate().token}"}
-    response = requests.get(url, headers=headers)
-    return response.json() if response.status_code == 200 else None
+    try:
+        response = w.api_client.do("GET", "/api/2.0/genie/spaces")
+        return response
+    except Exception as e:
+        print(f"Error getting Genie spaces with SP: {e}")
+        return None
 
 
 def get_genie_spaces_obo(user_token):
     """List Genie spaces using OBO token"""
-    url = f"https://{cfg.host}/api/2.0/genie/spaces"
-    headers = {"Authorization": f"Bearer {user_token}"}
-    response = requests.get(url, headers=headers)
-    return response.json() if response.status_code == 200 else None
+    try:
+        url = f"https://{cfg.host}/api/2.0/genie/spaces"
+        headers = {"Authorization": f"Bearer {user_token}"}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error getting Genie spaces with OBO: HTTP {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Error getting Genie spaces with OBO: {e}")
+        return None
 
 
 def get_genie_conversations_sp(space_id):
     """List conversations in a space using Service Principal auth"""
-    url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
-    headers = {"Authorization": f"Bearer {cfg.authenticate().token}"}
-    response = requests.get(url, headers=headers)
-    return response.json() if response.status_code == 200 else None
+    try:
+        response = w.api_client.do("GET", f"/api/2.0/genie/spaces/{space_id}/conversations")
+        return response
+    except Exception as e:
+        print(f"Error getting conversations with SP: {e}")
+        return None
 
 
 def get_genie_conversations_obo(space_id, user_token):
     """List conversations in a space using OBO token"""
-    url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
-    headers = {"Authorization": f"Bearer {user_token}"}
-    response = requests.get(url, headers=headers)
-    return response.json() if response.status_code == 200 else None
+    try:
+        url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
+        headers = {"Authorization": f"Bearer {user_token}"}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error getting conversations with OBO: HTTP {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Error getting conversations with OBO: {e}")
+        return None
