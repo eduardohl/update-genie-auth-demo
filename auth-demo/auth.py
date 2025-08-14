@@ -50,7 +50,9 @@ def get_connection_obo(http_path, user_token):
 def get_genie_spaces_sp():
     """List Genie spaces using Service Principal auth"""
     try:
+        print(f"DEBUG: Making SP request to /api/2.0/genie/spaces")
         response = w.api_client.do("GET", "/api/2.0/genie/spaces")
+        print(f"DEBUG: SP response received: {type(response)}")
         return response
     except Exception as e:
         print(f"Error getting Genie spaces with SP: {e}")
@@ -60,9 +62,16 @@ def get_genie_spaces_sp():
 def get_genie_spaces_obo(user_token):
     """List Genie spaces using OBO token"""
     try:
-        url = f"https://{cfg.host}/api/2.0/genie/spaces"
+        # Clean host URL construction
+        host = cfg.host.strip()
+        # Remove any protocol prefix and leading/trailing slashes
+        host = host.replace('https://', '').replace('http://', '').strip('/')
+        url = f"https://{host}/api/2.0/genie/spaces"
+        
+        print(f"DEBUG: Making OBO request to URL: {url}")
         headers = {"Authorization": f"Bearer {user_token}"}
         response = requests.get(url, headers=headers)
+        print(f"DEBUG: OBO Response status: {response.status_code}")
         if response.status_code == 200:
             return response.json()
         else:
@@ -76,7 +85,9 @@ def get_genie_spaces_obo(user_token):
 def get_genie_conversations_sp(space_id):
     """List conversations in a space using Service Principal auth"""
     try:
+        print(f"DEBUG: Making SP conversations request to /api/2.0/genie/spaces/{space_id}/conversations")
         response = w.api_client.do("GET", f"/api/2.0/genie/spaces/{space_id}/conversations")
+        print(f"DEBUG: SP conversations response received: {type(response)}")
         return response
     except Exception as e:
         print(f"Error getting conversations with SP: {e}")
@@ -86,9 +97,16 @@ def get_genie_conversations_sp(space_id):
 def get_genie_conversations_obo(space_id, user_token):
     """List conversations in a space using OBO token"""
     try:
-        url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
+        # Clean host URL construction
+        host = cfg.host.strip()
+        # Remove any protocol prefix and leading/trailing slashes
+        host = host.replace('https://', '').replace('http://', '').strip('/')
+        url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations"
+            
+        print(f"DEBUG: Making OBO conversations request to URL: {url}")
         headers = {"Authorization": f"Bearer {user_token}"}
         response = requests.get(url, headers=headers)
+        print(f"DEBUG: OBO conversations response status: {response.status_code}")
         if response.status_code == 200:
             return response.json()
         else:
