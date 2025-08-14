@@ -392,14 +392,17 @@ app.layout = dmc.MantineProvider(
                                             hide=True,
                                             radius="sm",
                                         ),
-                                        html.Div(
-                                            id="spaces-output-sp",
-                                            style={"display": "none"},
-                                        ),
-                                        html.Div(
-                                            id="conversations-output-sp",
-                                            style={"display": "none"},
-                                        ),
+                                        # Spaces output container
+                                        html.Div([
+                                            dmc.Text("Genie Spaces", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="spaces-output-sp")
+                                        ], id="spaces-container-sp", style={"display": "none"}, className="mb-3"),
+                                        
+                                        # Conversations output container
+                                        html.Div([
+                                            dmc.Text("Conversations", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="conversations-output-sp")
+                                        ], id="conversations-container-sp", style={"display": "none"}, className="mb-3"),
                                         dmc.LoadingOverlay(
                                             id="loading-overlay-genie-sp",
                                             visible=False,
@@ -480,14 +483,17 @@ app.layout = dmc.MantineProvider(
                                             hide=True,
                                             radius="sm",
                                         ),
-                                        html.Div(
-                                            id="spaces-output-obo",
-                                            style={"display": "none"},
-                                        ),
-                                        html.Div(
-                                            id="conversations-output-obo",
-                                            style={"display": "none"},
-                                        ),
+                                        # Spaces output container
+                                        html.Div([
+                                            dmc.Text("Genie Spaces", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="spaces-output-obo")
+                                        ], id="spaces-container-obo", style={"display": "none"}, className="mb-3"),
+                                        
+                                        # Conversations output container  
+                                        html.Div([
+                                            dmc.Text("Conversations", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="conversations-output-obo")
+                                        ], id="conversations-container-obo", style={"display": "none"}, className="mb-3"),
                                         dmc.LoadingOverlay(
                                             id="loading-overlay-genie-obo",
                                             visible=False,
@@ -982,7 +988,7 @@ def run_obo_query_callback(n_clicks, http_path, table_name):
 @callback(
     [
         Output("spaces-output-sp", "children"),
-        Output("spaces-output-sp", "style"),
+        Output("spaces-container-sp", "style"),
         Output("list-conversations-sp", "disabled"),
         Output("alert-genie-sp", "children"),
         Output("alert-genie-sp", "color"),
@@ -1029,7 +1035,7 @@ def list_spaces_sp_callback(n_clicks):
 @callback(
     [
         Output("conversations-output-sp", "children"),
-        Output("conversations-output-sp", "style"),
+        Output("conversations-container-sp", "style"),
         Output("alert-genie-sp", "children", allow_duplicate=True),
         Output("alert-genie-sp", "color", allow_duplicate=True),
         Output("alert-genie-sp", "hide", allow_duplicate=True),
@@ -1093,7 +1099,7 @@ def list_conversations_sp_callback(n_clicks):
 @callback(
     [
         Output("spaces-output-obo", "children"),
-        Output("spaces-output-obo", "style"),
+        Output("spaces-container-obo", "style"),
         Output("list-conversations-obo", "disabled"),
         Output("alert-genie-obo", "children"),
         Output("alert-genie-obo", "color"),
@@ -1151,7 +1157,7 @@ def list_spaces_obo_callback(n_clicks):
 @callback(
     [
         Output("conversations-output-obo", "children"),
-        Output("conversations-output-obo", "style"),
+        Output("conversations-container-obo", "style"),
         Output("alert-genie-obo", "children", allow_duplicate=True),
         Output("alert-genie-obo", "color", allow_duplicate=True),
         Output("alert-genie-obo", "hide", allow_duplicate=True),
