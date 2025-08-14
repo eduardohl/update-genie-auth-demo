@@ -10,12 +10,16 @@ from auth import (
     get_connection_obo,
     get_connection_sp,
     get_user_token,
+    get_genie_spaces_sp,
+    get_genie_spaces_obo,
+    get_genie_conversations_sp,
+    get_genie_conversations_obo,
 )
 from sql import (
     fetch_warehouses,
     run_query,
 )
-from utils import create_data_table, get_icon
+from utils import create_data_table, get_icon, create_genie_list
 
 app = Dash(external_stylesheets=[dmc.styles.ALL])
 app.title = "Databricks Auth Demo"
@@ -319,6 +323,84 @@ app.layout = dmc.MantineProvider(
                                     radius="md",
                                     withBorder=True,
                                     style={"position": "relative"},
+                                ),
+                                dmc.Paper(
+                                    [
+                                        dmc.Title("Genie Spaces API Demo", order=3, mb="md"),
+                                        dmc.Text("Test Genie Spaces API with both authentication methods.", size="sm", mb="md"),
+                                        
+                                        # Service Principal Genie Section
+                                        dmc.Accordion(
+                                            [
+                                                dmc.AccordionItem(
+                                                    [
+                                                        dmc.AccordionControl(
+                                                            "Service Principal - Genie API", 
+                                                            icon=get_icon("material-symbols:robot-outline")
+                                                        ),
+                                                        dmc.AccordionPanel(
+                                                            [
+                                                                dmc.Button(
+                                                                    "List Genie Spaces (SP)", 
+                                                                    id="list-spaces-sp", 
+                                                                    variant="outline", 
+                                                                    mb="md",
+                                                                    leftSection=get_icon("material-symbols:space-dashboard-outline")
+                                                                ),
+                                                                html.Div(id="spaces-output-sp"),
+                                                                dmc.Button(
+                                                                    "List Conversations (SP)", 
+                                                                    id="list-conversations-sp", 
+                                                                    variant="outline", 
+                                                                    mb="md", 
+                                                                    disabled=True,
+                                                                    leftSection=get_icon("material-symbols:chat-outline")
+                                                                ),
+                                                                html.Div(id="conversations-output-sp"),
+                                                            ]
+                                                        )
+                                                    ], 
+                                                    value="sp-genie"
+                                                ),
+                                                
+                                                # OBO Genie Section  
+                                                dmc.AccordionItem(
+                                                    [
+                                                        dmc.AccordionControl(
+                                                            "On-Behalf-Of User - Genie API",
+                                                            icon=get_icon("material-symbols:person-outline")
+                                                        ),
+                                                        dmc.AccordionPanel(
+                                                            [
+                                                                dmc.Button(
+                                                                    "List Genie Spaces (OBO)", 
+                                                                    id="list-spaces-obo", 
+                                                                    variant="outline", 
+                                                                    mb="md",
+                                                                    leftSection=get_icon("material-symbols:space-dashboard-outline")
+                                                                ),
+                                                                html.Div(id="spaces-output-obo"),
+                                                                dmc.Button(
+                                                                    "List Conversations (OBO)", 
+                                                                    id="list-conversations-obo", 
+                                                                    variant="outline", 
+                                                                    mb="md", 
+                                                                    disabled=True,
+                                                                    leftSection=get_icon("material-symbols:chat-outline")
+                                                                ),
+                                                                html.Div(id="conversations-output-obo"),
+                                                            ]
+                                                        )
+                                                    ], 
+                                                    value="obo-genie"
+                                                )
+                                            ]
+                                        )
+                                    ],
+                                    shadow="sm",
+                                    p="lg",
+                                    radius="md",
+                                    withBorder=True,
                                 ),
                             ],
                             gap="xl",
@@ -783,6 +865,112 @@ def run_obo_query_callback(n_clicks, http_path, table_name):
             loading_visible,
             False,
         )
+
+
+@callback(
+    [
+        Output("spaces-output-sp", "children"), 
+        Output("list-conversations-sp", "disabled")
+    ],
+    Input("list-spaces-sp", "n_clicks"),
+    prevent_initial_call=True,
+)
+def list_spaces_sp_callback(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    try:
+        spaces_data = get_genie_spaces_sp()
+        if spaces_data and 'spaces' in spaces_data:
+            spaces_list = create_genie_list(spaces_data['spaces'])
+            # Enable conversations button if spaces found
+            return spaces_list, len(spaces_data['spaces']) == 0
+        else:
+            return dmc.Alert("No spaces found or error occurred", color="yellow"), True
+    except Exception as e:
+        return dmc.Alert(f"Error: {str(e)}", color="red"), True
+
+
+@callback(
+    Output("conversations-output-sp", "children"),
+    Input("list-conversations-sp", "n_clicks"),
+    prevent_initial_call=True,
+)
+def list_conversations_sp_callback(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    # For demo, use first available space ID (in real app, let user select)
+    try:
+        spaces_data = get_genie_spaces_sp()
+        if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
+            first_space_id = spaces_data['spaces'][0]['id']
+            conv_data = get_genie_conversations_sp(first_space_id)
+            if conv_data and 'conversations' in conv_data:
+                return create_genie_list(conv_data['conversations'], 'title', 'id')
+            else:
+                return dmc.Alert("No conversations found", color="yellow")
+        else:
+            return dmc.Alert("No spaces available", color="yellow")
+    except Exception as e:
+        return dmc.Alert(f"Error: {str(e)}", color="red")
+
+
+@callback(
+    [
+        Output("spaces-output-obo", "children"), 
+        Output("list-conversations-obo", "disabled")
+    ],
+    Input("list-spaces-obo", "n_clicks"),
+    prevent_initial_call=True,
+)
+def list_spaces_obo_callback(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    try:
+        user_token = get_user_token()
+        if not user_token:
+            return dmc.Alert("OBO token not available", color="red"), True
+            
+        spaces_data = get_genie_spaces_obo(user_token)
+        if spaces_data and 'spaces' in spaces_data:
+            spaces_list = create_genie_list(spaces_data['spaces'])
+            # Enable conversations button if spaces found
+            return spaces_list, len(spaces_data['spaces']) == 0
+        else:
+            return dmc.Alert("No spaces found or error occurred", color="yellow"), True
+    except Exception as e:
+        return dmc.Alert(f"Error: {str(e)}", color="red"), True
+
+
+@callback(
+    Output("conversations-output-obo", "children"),
+    Input("list-conversations-obo", "n_clicks"),
+    prevent_initial_call=True,
+)
+def list_conversations_obo_callback(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    # For demo, use first available space ID (in real app, let user select)
+    try:
+        user_token = get_user_token()
+        if not user_token:
+            return dmc.Alert("OBO token not available", color="red")
+            
+        spaces_data = get_genie_spaces_obo(user_token)
+        if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
+            first_space_id = spaces_data['spaces'][0]['id']
+            conv_data = get_genie_conversations_obo(first_space_id, user_token)
+            if conv_data and 'conversations' in conv_data:
+                return create_genie_list(conv_data['conversations'], 'title', 'id')
+            else:
+                return dmc.Alert("No conversations found", color="yellow")
+        else:
+            return dmc.Alert("No spaces available", color="yellow")
+    except Exception as e:
+        return dmc.Alert(f"Error: {str(e)}", color="red")
 
 
 if __name__ == "__main__":

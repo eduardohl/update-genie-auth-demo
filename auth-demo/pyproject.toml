@@ -13,4 +13,5 @@ dependencies = [
     "pandas>=2.2.3",
     "pyarrow>=20.0.0",
     "pyjwt>=2.10.1",
+    "requests>=2.32.3",
 ]

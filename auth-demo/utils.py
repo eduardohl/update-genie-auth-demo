@@ -1,5 +1,6 @@
 from dash import dash_table
 from dash_iconify import DashIconify
+import dash_mantine_components as dmc
 
 
 def get_icon(icon):
@@ -53,3 +54,16 @@ def create_data_table(id):
         virtualization=True,
         fixed_rows={"headers": True},
     )
+
+
+def create_genie_list(items, title_key="title", id_key="id"):
+    """Create a formatted list for Genie spaces or conversations"""
+    if not items:
+        return dmc.Text("No items found", size="sm", c="dimmed")
+    
+    return dmc.List([
+        dmc.ListItem([
+            dmc.Text(item.get(title_key, "Untitled"), weight=500),
+            dmc.Text(f"ID: {item.get(id_key, 'Unknown')}", size="xs", c="dimmed")
+        ]) for item in items
+    ], size="sm", spacing="xs")

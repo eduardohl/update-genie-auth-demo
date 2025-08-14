@@ -2,6 +2,7 @@ from databricks import sql
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.core import Config
 from flask import request
+import requests
 
 cfg = Config()
 w = WorkspaceClient()
@@ -44,3 +45,35 @@ def get_connection_obo(http_path, user_token):
         http_path=http_path,
         access_token=user_token,
     )
+
+
+def get_genie_spaces_sp():
+    """List Genie spaces using Service Principal auth"""
+    url = f"https://{cfg.host}/api/2.0/genie/spaces"
+    headers = {"Authorization": f"Bearer {cfg.authenticate().token}"}
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+
+def get_genie_spaces_obo(user_token):
+    """List Genie spaces using OBO token"""
+    url = f"https://{cfg.host}/api/2.0/genie/spaces"
+    headers = {"Authorization": f"Bearer {user_token}"}
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+
+def get_genie_conversations_sp(space_id):
+    """List conversations in a space using Service Principal auth"""
+    url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
+    headers = {"Authorization": f"Bearer {cfg.authenticate().token}"}
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+
+def get_genie_conversations_obo(space_id, user_token):
+    """List conversations in a space using OBO token"""
+    url = f"https://{cfg.host}/api/2.0/genie/spaces/{space_id}/conversations"
+    headers = {"Authorization": f"Bearer {user_token}"}
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
