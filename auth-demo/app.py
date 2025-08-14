@@ -1049,7 +1049,15 @@ def list_conversations_sp_callback(n_clicks):
     try:
         spaces_data = get_genie_spaces_sp()
         if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
-            first_space_id = spaces_data['spaces'][0]['id']
+            first_space = spaces_data['spaces'][0]
+            # Try different possible ID field names
+            first_space_id = first_space.get('id') or first_space.get('space_id') or first_space.get('_id') or first_space.get('genie_space_id')
+            if not first_space_id:
+                print(f"ERROR: No valid ID found in space: {first_space}")
+                alert_msg = "Error: Could not find valid space ID in response."
+                alert_color = "red"
+                alert_title = "Invalid Response"
+                return "", container_style, alert_msg, alert_color, alert_hide, alert_title
             space_name = spaces_data['spaces'][0].get('title', 'Unknown Space')
             conv_data = get_genie_conversations_sp(first_space_id)
             if conv_data and 'conversations' in conv_data:
@@ -1174,7 +1182,15 @@ def list_conversations_obo_callback(n_clicks):
             
         spaces_data = get_genie_spaces_obo(user_token)
         if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
-            first_space_id = spaces_data['spaces'][0]['id']
+            first_space = spaces_data['spaces'][0]
+            # Try different possible ID field names
+            first_space_id = first_space.get('id') or first_space.get('space_id') or first_space.get('_id') or first_space.get('genie_space_id')
+            if not first_space_id:
+                print(f"ERROR: No valid ID found in space: {first_space}")
+                alert_msg = "Error: Could not find valid space ID in response."
+                alert_color = "red"
+                alert_title = "Invalid Response"
+                return "", container_style, alert_msg, alert_color, alert_hide, alert_title
             space_name = spaces_data['spaces'][0].get('title', 'Unknown Space')
             conv_data = get_genie_conversations_obo(first_space_id, user_token)
             if conv_data and 'conversations' in conv_data:
