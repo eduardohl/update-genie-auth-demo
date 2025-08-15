@@ -188,7 +188,8 @@ def run_obo_query_callback(n_clicks, http_path, table_name, obo_data):
     alert_hide = False
 
     try:
-        conn = get_connection_obo(http_path)
+        user_token = obo_data.get("token")
+        conn = get_connection_obo(http_path, user_token)
         df = run_query(table_name, conn)
         conn.close()
         loading_visible = False
