@@ -16,6 +16,7 @@ from utils import create_genie_list
         Output("alert-genie-sp", "children"),
         Output("alert-genie-sp", "color"),
         Output("alert-genie-sp", "title"),
+        Output("alert-genie-sp", "hide"),
     ],
     Input("list-spaces-sp", "n_clicks"),
     prevent_initial_call=True,
@@ -44,7 +45,7 @@ def list_spaces_sp_callback(n_clicks):
             alert_color = "red"
             alert_title = "Access Denied"
             space_selector_style = {"display": "none"}
-            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
         
         # Check for empty response structure (permission issue)
         if isinstance(spaces_data, dict) and len(spaces_data) == 0:
@@ -62,7 +63,7 @@ def list_spaces_sp_callback(n_clicks):
             alert_color = "red"
             alert_title = "Permission Denied"
             space_selector_style = {"display": "none"}
-            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
         
         # Check for proper response structure
         if isinstance(spaces_data, dict) and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
@@ -125,7 +126,7 @@ def list_spaces_sp_callback(n_clicks):
         alert_color = "red"
         alert_title = "Connection Error"
         space_selector_style = {"display": "none"}
-        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
 
 
 @callback(
@@ -210,6 +211,7 @@ def list_conversations_sp_callback(n_clicks, selected_space_id):
         Output("alert-genie-obo", "children"),
         Output("alert-genie-obo", "color"),
         Output("alert-genie-obo", "title"),
+        Output("alert-genie-obo", "hide"),
     ],
     Input("list-spaces-obo", "n_clicks"),
     prevent_initial_call=True,
@@ -232,7 +234,7 @@ def list_spaces_obo_callback(n_clicks):
             alert_color = "red"
             alert_title = "OBO Token Missing"
             space_selector_style = {"display": "none"}
-            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
             
         spaces_data = get_genie_spaces_obo(user_token)
         
@@ -313,7 +315,7 @@ def list_spaces_obo_callback(n_clicks):
         alert_color = "red"
         alert_title = "Connection Error"
         space_selector_style = {"display": "none"}
-        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
 
 
 @callback(
