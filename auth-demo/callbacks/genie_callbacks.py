@@ -252,7 +252,7 @@ def list_spaces_obo_callback(n_clicks):
             alert_color = "red"
             alert_title = "Access Denied"
             space_selector_style = {"display": "none"}
-            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
         
         # Check for proper response structure
         if isinstance(spaces_data, dict) and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
@@ -271,7 +271,7 @@ def list_spaces_obo_callback(n_clicks):
             space_options = [{"label": space.get('title', 'Unknown Space'), "value": space.get('id') or space.get('space_id') or space.get('_id') or space.get('genie_space_id')} for space in spaces_data['spaces']]
             space_selector_style = {"display": "block"}
             
-            return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title
+            return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title, False
         else:
             # Handle unexpected response structure
             if isinstance(spaces_data, dict):
