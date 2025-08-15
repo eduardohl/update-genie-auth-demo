@@ -1,6 +1,6 @@
 import dash
 import dash_mantine_components as dmc
-from dash import Input, Output, callback, html
+from dash import Input, Output, State, callback, html
 
 from auth import get_genie_spaces_sp, get_genie_spaces_obo, get_genie_conversations_sp, get_genie_conversations_obo, get_user_token
 from utils import create_genie_list
