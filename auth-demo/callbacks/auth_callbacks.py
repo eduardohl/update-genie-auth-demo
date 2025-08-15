@@ -4,7 +4,8 @@ from dash import Input, Output, callback, html
 import jwt
 import json
 
-from auth import fetch_sp_details, fetch_warehouses
+from auth import fetch_sp_details
+from sql import fetch_warehouses
 
 
 @callback(
