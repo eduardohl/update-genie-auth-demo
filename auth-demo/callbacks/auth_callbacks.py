@@ -140,7 +140,7 @@ def update_header_and_warehouses(_):
         obo_color,  # obo-token-status color
         obo_title,  # obo-token-status title
         obo_disabled,  # run-query-obo disabled
-        {"token": has_token},  # obo-token-store data
+        {"token": obo_token} if has_token else {"token": None},  # obo-token-store data
         obo_username,  # obo-username
         wh_options,  # sql-http-path data
         wh_value,  # sql-http-path value
