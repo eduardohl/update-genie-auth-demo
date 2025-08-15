@@ -64,6 +64,9 @@ def list_spaces_sp_callback(n_clicks):
     [
         Output("conversations-output-sp", "children"),
         Output("conversations-container-sp", "style"),
+        Output("conversation-selector-sp", "data"),
+        Output("conversation-selector-sp", "style"),
+        Output("list-messages-sp", "disabled"),
         Output("alert-genie-sp", "children", allow_duplicate=True),
         Output("alert-genie-sp", "color", allow_duplicate=True),
         Output("alert-genie-sp", "title", allow_duplicate=True),
@@ -99,6 +102,12 @@ def list_conversations_sp_callback(n_clicks, selected_space_id):
         conv_data = get_genie_conversations_sp(selected_space_id)
         if conv_data and 'conversations' in conv_data:
             conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
+            
+            # Create dropdown options for conversations
+            conversation_options = [{"label": conv.get('title', 'Unknown Conversation'), "value": conv.get('id') or conv.get('conversation_id') or conv.get('_id') or conv.get('genie_conversation_id')} for conv in conv_data['conversations']]
+            conversation_selector_style = {"display": "block"}
+            messages_disabled = len(conv_data['conversations']) == 0
+            
             alert_msg = [
                 "Success! Found ",
                 html.B(f"{len(conv_data['conversations'])}"),
@@ -109,12 +118,13 @@ def list_conversations_sp_callback(n_clicks, selected_space_id):
             alert_color = "green"
             alert_title = "Conversations Retrieved"
             container_style = {"display": "block"}
-            return conversations_list, container_style, alert_msg, alert_color, alert_title
+            return conversations_list, container_style, conversation_options, conversation_selector_style, messages_disabled, alert_msg, alert_color, alert_title
         else:
             alert_msg = f"No conversations found in space {space_name}."
             alert_color = "yellow"
             alert_title = "No Conversations"
-            return "", container_style, alert_msg, alert_color, alert_title
+            conversation_selector_style = {"display": "none"}
+            return "", container_style, [], conversation_selector_style, True, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving conversations with Service Principal: ", dmc.Code(str(e))]
         alert_color = "red"
@@ -191,6 +201,9 @@ def list_spaces_obo_callback(n_clicks):
     [
         Output("conversations-output-obo", "children"),
         Output("conversations-container-obo", "style"),
+        Output("conversation-selector-obo", "data"),
+        Output("conversation-selector-obo", "style"),
+        Output("list-messages-obo", "disabled"),
         Output("alert-genie-obo", "children", allow_duplicate=True),
         Output("alert-genie-obo", "color", allow_duplicate=True),
         Output("alert-genie-obo", "title", allow_duplicate=True),
@@ -237,6 +250,12 @@ def list_conversations_obo_callback(n_clicks, selected_space_id):
         conv_data = get_genie_conversations_obo(selected_space_id, user_token)
         if conv_data and 'conversations' in conv_data:
             conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
+            
+            # Create dropdown options for conversations
+            conversation_options = [{"label": conv.get('title', 'Unknown Conversation'), "value": conv.get('id') or conv.get('conversation_id') or conv.get('_id') or conv.get('genie_conversation_id')} for conv in conv_data['conversations']]
+            conversation_selector_style = {"display": "block"}
+            messages_disabled = len(conv_data['conversations']) == 0
+            
             alert_msg = [
                 "Success! Found ",
                 html.B(f"{len(conv_data['conversations'])}"),
@@ -247,12 +266,13 @@ def list_conversations_obo_callback(n_clicks, selected_space_id):
             alert_color = "green"
             alert_title = "Conversations Retrieved"
             container_style = {"display": "block"}
-            return conversations_list, container_style, alert_msg, alert_color, alert_title
+            return conversations_list, container_style, conversation_options, conversation_selector_style, messages_disabled, alert_msg, alert_color, alert_title
         else:
             alert_msg = f"No conversations found in space {space_name} with OBO authorization."
             alert_color = "yellow"
             alert_title = "No Conversations"
-            return "", container_style, alert_msg, alert_color, alert_title
+            conversation_selector_style = {"display": "none"}
+            return "", container_style, [], conversation_selector_style, True, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving conversations with OBO: ", dmc.Code(str(e))]
         alert_color = "red"

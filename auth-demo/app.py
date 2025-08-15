@@ -30,6 +30,10 @@ from callbacks.genie_callbacks import (
     list_spaces_obo_callback,
     list_conversations_obo_callback,
 )
+from callbacks.message_callbacks import (
+    list_messages_sp_callback,
+    list_messages_obo_callback,
+)
 
 app = Dash(external_stylesheets=[dmc.styles.ALL])
 app.title = "Databricks Auth Demo"
@@ -386,12 +390,35 @@ app.layout = dmc.MantineProvider(
                                             mb="md",
                                             style={"display": "none"},
                                         ),
+                                        dmc.Select(
+                                            id="conversation-selector-sp",
+                                            label="Select Conversation for Messages",
+                                            placeholder="Choose a conversation...",
+                                            data=[],
+                                            mb="md",
+                                            style={"display": "none"},
+                                        ),
                                         dmc.Button(
                                             "List Conversations (SP)",
                                             id="list-conversations-sp",
                                             variant="outline",
                                             leftSection=get_icon(
                                                 "material-symbols:chat-outline"
+                                            ),
+                                            mb="md",
+                                            disabled=True,
+                                            loading=False,
+                                            loaderProps={
+                                                "variant": "dots",
+                                                "size": "sm",
+                                            },
+                                        ),
+                                        dmc.Button(
+                                            "List Messages (SP)",
+                                            id="list-messages-sp",
+                                            variant="outline",
+                                            leftSection=get_icon(
+                                                "material-symbols:message-outline"
                                             ),
                                             mb="md",
                                             disabled=True,
@@ -421,6 +448,12 @@ app.layout = dmc.MantineProvider(
                                             dmc.Text("Conversations", size="sm", fw=500, mb="xs"),
                                             html.Div(id="conversations-output-sp")
                                         ], id="conversations-container-sp", style={"display": "none"}, className="mb-3"),
+                                        
+                                        # Messages output container
+                                        html.Div([
+                                            dmc.Text("Messages", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="messages-output-sp")
+                                        ], id="messages-container-sp", style={"display": "none"}, className="mb-3"),
                                         dmc.LoadingOverlay(
                                             id="loading-overlay-genie-sp",
                                             visible=False,
@@ -484,12 +517,34 @@ app.layout = dmc.MantineProvider(
                                             mb="md",
                                             style={"display": "none"},
                                         ),
+                                        dmc.Select(
+                                            id="conversation-selector-obo",
+                                            label="Select Conversation for Messages",
+                                            placeholder="Choose a conversation...",
+                                            mb="md",
+                                            style={"display": "none"},
+                                        ),
                                         dmc.Button(
                                             "List Conversations (OBO)",
                                             id="list-conversations-obo",
                                             variant="outline",
                                             leftSection=get_icon(
                                                 "material-symbols:chat-outline"
+                                            ),
+                                            mb="md",
+                                            disabled=True,
+                                            loading=False,
+                                            loaderProps={
+                                                "variant": "dots",
+                                                "size": "sm",
+                                            },
+                                        ),
+                                        dmc.Button(
+                                            "List Messages (OBO)",
+                                            id="list-messages-obo",
+                                            variant="outline",
+                                            leftSection=get_icon(
+                                                "material-symbols:message-outline"
                                             ),
                                             mb="md",
                                             disabled=True,
@@ -519,6 +574,12 @@ app.layout = dmc.MantineProvider(
                                             dmc.Text("Conversations", size="sm", fw=500, mb="xs"),
                                             html.Div(id="conversations-output-obo")
                                         ], id="conversations-container-obo", style={"display": "none"}, className="mb-3"),
+                                        
+                                        # Messages output container
+                                        html.Div([
+                                            dmc.Text("Messages", size="sm", fw=500, mb="xs"),
+                                            html.Div(id="messages-output-obo")
+                                        ], id="messages-container-obo", style={"display": "none"}, className="mb-3"),
                                         dmc.LoadingOverlay(
                                             id="loading-overlay-genie-obo",
                                             visible=False,

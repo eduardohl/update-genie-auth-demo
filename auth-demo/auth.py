@@ -197,3 +197,80 @@ def get_genie_conversations_obo(space_id, user_token):
     except Exception as e:
         print(f"ERROR: Failed to get conversations with OBO: {e}")
         return None
+
+
+def get_genie_messages_sp(space_id, conversation_id):
+    """List messages in a conversation using Service Principal auth"""
+    if not space_id:
+        print("ERROR: No space_id provided")
+        return None
+        
+    if not conversation_id:
+        print("ERROR: No conversation_id provided")
+        return None
+        
+    try:
+        endpoint = f"/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
+        response = w.api_client.do("GET", endpoint)
+        
+        # Check if response has 'messages' key
+        if isinstance(response, dict):
+            if 'messages' in response:
+                messages = response['messages']
+                print(f"INFO: Found {len(messages)} messages in conversation {conversation_id} using Service Principal")
+            else:
+                print("WARNING: No 'messages' key in response")
+        else:
+            print(f"WARNING: Unexpected response type from messages API: {type(response)}")
+            
+        return response
+        
+    except Exception as e:
+        print(f"ERROR: Failed to get messages with Service Principal: {e}")
+        return None
+
+
+def get_genie_messages_obo(space_id, conversation_id, user_token):
+    """List messages in a conversation using OBO token"""
+    if not space_id:
+        print("ERROR: No space_id provided")
+        return None
+        
+    if not conversation_id:
+        print("ERROR: No conversation_id provided")
+        return None
+        
+    if not user_token:
+        print("ERROR: No OBO token provided")
+        return None
+        
+    try:
+        # Clean host URL construction
+        host = cfg.host.strip()
+        host = host.replace('https://', '').replace('http://', '').strip('/')
+        url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
+        
+        response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+        
+        if response.status_code == 200:
+            try:
+                json_response = response.json()
+                
+                if isinstance(json_response, dict) and 'messages' in json_response:
+                    messages = json_response['messages']
+                    print(f"INFO: Found {len(messages)} messages in conversation {conversation_id} using OBO")
+                else:
+                    print("WARNING: OBO messages response missing 'messages' key or not a dict")
+                    
+                return json_response
+                
+            except json.JSONDecodeError as je:
+                print(f"ERROR: Failed to parse JSON response: {je}")
+                return None
+        else:
+            print(f"ERROR: Genie messages OBO request failed: HTTP {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"ERROR: Failed to get messages with OBO: {e}")
+        return None
