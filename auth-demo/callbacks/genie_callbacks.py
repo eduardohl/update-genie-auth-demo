@@ -29,7 +29,43 @@ def list_spaces_sp_callback(n_clicks):
     
     try:
         spaces_data = get_genie_spaces_sp()
-        if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
+        
+        # Check for empty response (likely permission issue)
+        if not spaces_data:
+            alert_msg = [
+                "Error: Failed to retrieve Genie spaces. This could be due to:",
+                html.Br(),
+                "• Missing Service Principal permissions for Genie API",
+                html.Br(),
+                "• Genie features not enabled in this workspace",
+                html.Br(),
+                "• API endpoint not accessible with current credentials"
+            ]
+            alert_color = "red"
+            alert_title = "Access Denied"
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+        
+        # Check for empty response structure (permission issue)
+        if isinstance(spaces_data, dict) and len(spaces_data) == 0:
+            alert_msg = [
+                "Error: Service Principal received empty response from Genie API.",
+                html.Br(),
+                "This typically indicates:",
+                html.Br(),
+                "• Missing 'dashboards.genie' scope in SP permissions",
+                html.Br(),
+                "• Genie API access not granted to this Service Principal",
+                html.Br(),
+                "• Workspace-level restrictions on Genie features"
+            ]
+            alert_color = "red"
+            alert_title = "Permission Denied"
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+        
+        # Check for proper response structure
+        if isinstance(spaces_data, dict) and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
             spaces_list = create_genie_list(spaces_data['spaces'])
             alert_msg = [
                 "Success! Found ",
@@ -47,15 +83,47 @@ def list_spaces_sp_callback(n_clicks):
             
             return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title
         else:
-            alert_msg = "No Genie spaces found or error occurred."
-            alert_color = "yellow"
-            alert_title = "No Spaces"
+            # Handle unexpected response structure
+            if isinstance(spaces_data, dict):
+                response_keys = list(spaces_data.keys())
+                alert_msg = [
+                    "Error: Unexpected response structure from Genie API.",
+                    html.Br(),
+                    "Response keys: ",
+                    dmc.Code(str(response_keys)),
+                    html.Br(),
+                    "This suggests the API response format has changed or there's a configuration issue."
+                ]
+            else:
+                alert_msg = [
+                    "Error: Unexpected response type from Genie API.",
+                    html.Br(),
+                    "Expected dict, got: ",
+                    dmc.Code(str(type(spaces_data))),
+                    html.Br(),
+                    "This suggests an API configuration or authentication issue."
+                ]
+            alert_color = "red"
+            alert_title = "API Error"
             space_selector_style = {"display": "none"}
             return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            
     except Exception as e:
-        alert_msg = ["Error retrieving Genie spaces with Service Principal: ", dmc.Code(str(e))]
+        alert_msg = [
+            "Error retrieving Genie spaces with Service Principal: ",
+            dmc.Code(str(e)),
+            html.Br(),
+            html.Br(),
+            "This could be due to:",
+            html.Br(),
+            "• Network connectivity issues",
+            html.Br(),
+            "• Invalid Service Principal credentials",
+            html.Br(),
+            "• Genie API endpoint not accessible"
+        ]
         alert_color = "red"
-        alert_title = "Error"
+        alert_title = "Connection Error"
         space_selector_style = {"display": "none"}
         return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
 
@@ -163,10 +231,29 @@ def list_spaces_obo_callback(n_clicks):
             ]
             alert_color = "red"
             alert_title = "OBO Token Missing"
-            return "", container_style, True, alert_msg, alert_color, alert_title
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
             
         spaces_data = get_genie_spaces_obo(user_token)
-        if spaces_data and 'spaces' in spaces_data:
+        
+        # Check for empty response (likely permission issue)
+        if not spaces_data:
+            alert_msg = [
+                "Error: Failed to retrieve Genie spaces with OBO. This could be due to:",
+                html.Br(),
+                "• Missing user permissions for Genie API",
+                html.Br(),
+                "• Genie features not enabled in this workspace",
+                html.Br(),
+                "• API endpoint not accessible with your user credentials"
+            ]
+            alert_color = "red"
+            alert_title = "Access Denied"
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+        
+        # Check for proper response structure
+        if isinstance(spaces_data, dict) and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
             spaces_list = create_genie_list(spaces_data['spaces'])
             alert_msg = [
                 "Success! Found ",
@@ -184,15 +271,47 @@ def list_spaces_obo_callback(n_clicks):
             
             return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title
         else:
-            alert_msg = "No Genie spaces found or error occurred with OBO authorization."
-            alert_color = "yellow"
-            alert_title = "No Spaces"
+            # Handle unexpected response structure
+            if isinstance(spaces_data, dict):
+                response_keys = list(spaces_data.keys())
+                alert_msg = [
+                    "Error: Unexpected response structure from Genie API with OBO.",
+                    html.Br(),
+                    "Response keys: ",
+                    dmc.Code(str(response_keys)),
+                    html.Br(),
+                    "This suggests the API response format has changed or there's a configuration issue."
+                ]
+            else:
+                alert_msg = [
+                    "Error: Unexpected response type from Genie API with OBO.",
+                    html.Br(),
+                    "Expected dict, got: ",
+                    dmc.Code(str(type(spaces_data))),
+                    html.Br(),
+                    "This suggests an API configuration or authentication issue."
+                ]
+            alert_color = "red"
+            alert_title = "API Error"
             space_selector_style = {"display": "none"}
             return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            
     except Exception as e:
-        alert_msg = ["Error retrieving Genie spaces with OBO: ", dmc.Code(str(e))]
+        alert_msg = [
+            "Error retrieving Genie spaces with OBO: ",
+            dmc.Code(str(e)),
+            html.Br(),
+            html.Br(),
+            "This could be due to:",
+            html.Br(),
+            "• Network connectivity issues",
+            html.Br(),
+            "• Invalid or expired OBO token",
+            html.Br(),
+            "• Genie API endpoint not accessible with your credentials"
+        ]
         alert_color = "red"
-        alert_title = "Error"
+        alert_title = "Connection Error"
         space_selector_style = {"display": "none"}
         return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
 
