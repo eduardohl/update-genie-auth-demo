@@ -296,7 +296,7 @@ def list_spaces_obo_callback(n_clicks):
             alert_color = "red"
             alert_title = "API Error"
             space_selector_style = {"display": "none"}
-            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title, False
             
     except Exception as e:
         alert_msg = [
