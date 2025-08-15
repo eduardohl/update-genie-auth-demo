@@ -11,6 +11,8 @@ from utils import create_genie_list
         Output("spaces-output-sp", "children"),
         Output("spaces-container-sp", "style"),
         Output("list-conversations-sp", "disabled"),
+        Output("space-selector-sp", "data"),
+        Output("space-selector-sp", "style"),
         Output("alert-genie-sp", "children"),
         Output("alert-genie-sp", "color"),
         Output("alert-genie-sp", "title"),
@@ -39,17 +41,23 @@ def list_spaces_sp_callback(n_clicks):
             container_style = {"display": "block"}
             # Enable conversations button if spaces found
             conversations_disabled = len(spaces_data['spaces']) == 0
-            return spaces_list, container_style, conversations_disabled, alert_msg, alert_color, alert_title
+            # Create dropdown options for spaces
+            space_options = [{"label": space.get('title', 'Unknown Space'), "value": space.get('id') or space.get('space_id') or space.get('_id') or space.get('genie_space_id')} for space in spaces_data['spaces']]
+            space_selector_style = {"display": "block"}
+            
+            return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title
         else:
             alert_msg = "No Genie spaces found or error occurred."
             alert_color = "yellow"
             alert_title = "No Spaces"
-            return "", container_style, True, alert_msg, alert_color, alert_title
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving Genie spaces with Service Principal: ", dmc.Code(str(e))]
         alert_color = "red"
         alert_title = "Error"
-        return "", container_style, True, alert_msg, alert_color, alert_title
+        space_selector_style = {"display": "none"}
+        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
 
 
 @callback(
@@ -61,52 +69,51 @@ def list_spaces_sp_callback(n_clicks):
         Output("alert-genie-sp", "title", allow_duplicate=True),
     ],
     Input("list-conversations-sp", "n_clicks"),
+    State("space-selector-sp", "value"),
     prevent_initial_call=True,
 )
-def list_conversations_sp_callback(n_clicks):
+def list_conversations_sp_callback(n_clicks, selected_space_id):
     """List conversations in a space using Service Principal credentials"""
     if not n_clicks:
         return dash.no_update
     
+    if not selected_space_id:
+        alert_msg = "Please select a space first."
+        alert_color = "yellow"
+        alert_title = "No Space Selected"
+        return "", {"display": "none"}, alert_msg, alert_color, alert_title
+    
     container_style = {"display": "none"}
     
-    # For demo, use first available space ID (in real app, let user select)
     try:
+        # Get space details to find the name
         spaces_data = get_genie_spaces_sp()
-        if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
-            first_space = spaces_data['spaces'][0]
-            # Try different possible ID field names
-            first_space_id = first_space.get('id') or first_space.get('space_id') or first_space.get('_id') or first_space.get('genie_space_id')
-            if not first_space_id:
-                print(f"ERROR: No valid ID found in space: {first_space}")
-                alert_msg = "Error: Could not find valid space ID in response."
-                alert_color = "red"
-                alert_title = "Invalid Response"
-                return "", container_style, alert_msg, alert_color, alert_title
-            space_name = spaces_data['spaces'][0].get('title', 'Unknown Space')
-            conv_data = get_genie_conversations_sp(first_space_id)
-            if conv_data and 'conversations' in conv_data:
-                conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
-                alert_msg = [
-                    "Success! Found ",
-                    html.B(f"{len(conv_data['conversations'])}"),
-                    " conversations in space ",
-                    dmc.Code(space_name),
-                    " using Service Principal credentials.",
-                ]
-                alert_color = "green"
-                alert_title = "Conversations Retrieved"
-                container_style = {"display": "block"}
-                return conversations_list, container_style, alert_msg, alert_color, alert_title
-            else:
-                alert_msg = f"No conversations found in space {space_name}."
-                alert_color = "yellow"
-                alert_title = "No Conversations"
-                return "", container_style, alert_msg, alert_color, alert_title
+        space_name = "Unknown Space"
+        if spaces_data and 'spaces' in spaces_data:
+            for space in spaces_data['spaces']:
+                space_id = space.get('id') or space.get('space_id') or space.get('_id') or space.get('genie_space_id')
+                if space_id == selected_space_id:
+                    space_name = space.get('title', 'Unknown Space')
+                    break
+        
+        conv_data = get_genie_conversations_sp(selected_space_id)
+        if conv_data and 'conversations' in conv_data:
+            conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
+            alert_msg = [
+                "Success! Found ",
+                html.B(f"{len(conv_data['conversations'])}"),
+                " conversations in space ",
+                dmc.Code(space_name),
+                " using Service Principal credentials.",
+            ]
+            alert_color = "green"
+            alert_title = "Conversations Retrieved"
+            container_style = {"display": "block"}
+            return conversations_list, container_style, alert_msg, alert_color, alert_title
         else:
-            alert_msg = "No spaces available to query for conversations."
+            alert_msg = f"No conversations found in space {space_name}."
             alert_color = "yellow"
-            alert_title = "No Spaces"
+            alert_title = "No Conversations"
             return "", container_style, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving conversations with Service Principal: ", dmc.Code(str(e))]
@@ -120,6 +127,8 @@ def list_conversations_sp_callback(n_clicks):
         Output("spaces-output-obo", "children"),
         Output("spaces-container-obo", "style"),
         Output("list-conversations-obo", "disabled"),
+        Output("space-selector-obo", "data"),
+        Output("space-selector-obo", "style"),
         Output("alert-genie-obo", "children"),
         Output("alert-genie-obo", "color"),
         Output("alert-genie-obo", "title"),
@@ -159,17 +168,23 @@ def list_spaces_obo_callback(n_clicks):
             container_style = {"display": "block"}
             # Enable conversations button if spaces found
             conversations_disabled = len(spaces_data['spaces']) == 0
-            return spaces_list, container_style, conversations_disabled, alert_msg, alert_color, alert_title
+            # Create dropdown options for spaces
+            space_options = [{"label": space.get('title', 'Unknown Space'), "value": space.get('id') or space.get('space_id') or space.get('_id') or space.get('genie_space_id')} for space in spaces_data['spaces']]
+            space_selector_style = {"display": "block"}
+            
+            return spaces_list, container_style, conversations_disabled, space_options, space_selector_style, alert_msg, alert_color, alert_title
         else:
             alert_msg = "No Genie spaces found or error occurred with OBO authorization."
             alert_color = "yellow"
             alert_title = "No Spaces"
-            return "", container_style, True, alert_msg, alert_color, alert_title
+            space_selector_style = {"display": "none"}
+            return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving Genie spaces with OBO: ", dmc.Code(str(e))]
         alert_color = "red"
         alert_title = "Error"
-        return "", container_style, True, alert_msg, alert_color, alert_title
+        space_selector_style = {"display": "none"}
+        return "", container_style, True, [], space_selector_style, alert_msg, alert_color, alert_title
 
 
 @callback(
@@ -181,16 +196,22 @@ def list_spaces_obo_callback(n_clicks):
         Output("alert-genie-obo", "title", allow_duplicate=True),
     ],
     Input("list-conversations-obo", "n_clicks"),
+    State("space-selector-obo", "value"),
     prevent_initial_call=True,
 )
-def list_conversations_obo_callback(n_clicks):
+def list_conversations_obo_callback(n_clicks, selected_space_id):
     """List conversations in a space using On-Behalf-Of (OBO) credentials"""
     if not n_clicks:
         return dash.no_update
     
+    if not selected_space_id:
+        alert_msg = "Please select a space first."
+        alert_color = "yellow"
+        alert_title = "No Space Selected"
+        return "", {"display": "none"}, alert_msg, alert_color, alert_title
+    
     container_style = {"display": "none"}
     
-    # For demo, use first available space ID (in real app, let user select)
     try:
         user_token = get_user_token()
         if not user_token:
@@ -203,41 +224,34 @@ def list_conversations_obo_callback(n_clicks):
             alert_title = "OBO Token Missing"
             return "", container_style, alert_msg, alert_color, alert_title
             
+        # Get space details to find the name
         spaces_data = get_genie_spaces_obo(user_token)
-        if spaces_data and 'spaces' in spaces_data and len(spaces_data['spaces']) > 0:
-            first_space = spaces_data['spaces'][0]
-            # Try different possible ID field names
-            first_space_id = first_space.get('id') or first_space.get('space_id') or first_space.get('_id') or first_space.get('genie_space_id')
-            if not first_space_id:
-                print(f"ERROR: No valid ID found in space: {first_space}")
-                alert_msg = "Error: Could not find valid space ID in response."
-                alert_color = "red"
-                alert_title = "Invalid Response"
-                return "", container_style, alert_msg, alert_color, alert_title
-            space_name = spaces_data['spaces'][0].get('title', 'Unknown Space')
-            conv_data = get_genie_conversations_obo(first_space_id, user_token)
-            if conv_data and 'conversations' in conv_data:
-                conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
-                alert_msg = [
-                    "Success! Found ",
-                    html.B(f"{len(conv_data['conversations'])}"),
-                    " conversations in space ",
-                    dmc.Code(space_name),
-                    " using OBO authorization.",
-                ]
-                alert_color = "green"
-                alert_title = "Conversations Retrieved"
-                container_style = {"display": "block"}
-                return conversations_list, container_style, alert_msg, alert_color, alert_title
-            else:
-                alert_msg = f"No conversations found in space {space_name} with OBO authorization."
-                alert_color = "yellow"
-                alert_title = "No Conversations"
-                return "", container_style, alert_msg, alert_color, alert_title
+        space_name = "Unknown Space"
+        if spaces_data and 'spaces' in spaces_data:
+            for space in spaces_data['spaces']:
+                space_id = space.get('id') or space.get('space_id') or space.get('_id') or space.get('genie_space_id')
+                if space_id == selected_space_id:
+                    space_name = space.get('title', 'Unknown Space')
+                    break
+        
+        conv_data = get_genie_conversations_obo(selected_space_id, user_token)
+        if conv_data and 'conversations' in conv_data:
+            conversations_list = create_genie_list(conv_data['conversations'], 'title', 'id')
+            alert_msg = [
+                "Success! Found ",
+                html.B(f"{len(conv_data['conversations'])}"),
+                " conversations in space ",
+                dmc.Code(space_name),
+                " using OBO authorization.",
+            ]
+            alert_color = "green"
+            alert_title = "Conversations Retrieved"
+            container_style = {"display": "block"}
+            return conversations_list, container_style, alert_msg, alert_color, alert_title
         else:
-            alert_msg = "No spaces available to query for conversations with OBO authorization."
+            alert_msg = f"No conversations found in space {space_name} with OBO authorization."
             alert_color = "yellow"
-            alert_title = "No Spaces"
+            alert_title = "No Conversations"
             return "", container_style, alert_msg, alert_color, alert_title
     except Exception as e:
         alert_msg = ["Error retrieving conversations with OBO: ", dmc.Code(str(e))]

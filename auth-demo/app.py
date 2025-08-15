@@ -378,6 +378,14 @@ app.layout = dmc.MantineProvider(
                                                 "size": "sm",
                                             },
                                         ),
+                                        dmc.Select(
+                                            id="space-selector-sp",
+                                            label="Select Space for Conversations",
+                                            placeholder="Choose a space...",
+                                            data=[],
+                                            mb="md",
+                                            style={"display": "none"},
+                                        ),
                                         dmc.Button(
                                             "List Conversations (SP)",
                                             id="list-conversations-sp",
@@ -468,6 +476,13 @@ app.layout = dmc.MantineProvider(
                                                 "variant": "dots",
                                                 "size": "sm",
                                             },
+                                        ),
+                                        dmc.Select(
+                                            id="space-selector-obo",
+                                            label="Select Space for Conversations",
+                                            placeholder="Choose a space...",
+                                            mb="md",
+                                            style={"display": "none"},
                                         ),
                                         dmc.Button(
                                             "List Conversations (OBO)",
