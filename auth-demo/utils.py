@@ -77,8 +77,25 @@ def create_genie_list(items, title_key="title", id_key="id"):
     return dmc.List(list_items, size="sm", spacing="xs")
 
 
-def create_genie_messages_list(messages):
+def create_genie_messages_list(messages_data):
     """Create a formatted list for Genie messages"""
+    # Handle case where we get a structure with message count but no messages
+    if isinstance(messages_data, dict) and 'note' in messages_data:
+        message_count = messages_data.get('message_count', 0)
+        note = messages_data.get('note', '')
+        return dmc.Alert([
+            dmc.Text(f"Found {message_count} messages in this conversation", fw=500),
+            dmc.Text(note, size="sm", c="dimmed", mt="xs")
+        ], title="Message Count Available", color="blue", variant="light")
+    
+    # Handle case where we get a list of messages
+    if isinstance(messages_data, list):
+        messages = messages_data
+    elif isinstance(messages_data, dict) and 'messages' in messages_data:
+        messages = messages_data['messages']
+    else:
+        messages = messages_data
+    
     if not messages:
         return dmc.Text("No messages found", size="sm", c="dimmed")
     

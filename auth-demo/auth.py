@@ -210,20 +210,78 @@ def get_genie_messages_sp(space_id, conversation_id):
         return None
         
     try:
-        endpoint = f"/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
-        response = w.api_client.do("GET", endpoint)
+        # Try multiple API patterns for listing messages
         
-        # Check if response has 'messages' key
-        if isinstance(response, dict):
-            if 'messages' in response:
-                messages = response['messages']
-                print(f"INFO: Found {len(messages)} messages in conversation {conversation_id} using Service Principal")
-            else:
-                print("WARNING: No 'messages' key in response")
-        else:
-            print(f"WARNING: Unexpected response type from messages API: {type(response)}")
+        # Pattern 1: Standard messages endpoint (what we were trying)
+        try:
+            endpoint = f"/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
+            response = w.api_client.do("GET", endpoint)
             
-        return response
+            if isinstance(response, dict) and 'messages' in response:
+                messages = response['messages']
+                print(f"INFO: Found {len(messages)} messages using standard endpoint")
+                return response
+            else:
+                print("INFO: Standard messages endpoint didn't return expected format")
+        except Exception as e:
+            print(f"INFO: Standard messages endpoint failed: {e}")
+        
+        # Pattern 2: Try with query parameters for pagination/listing
+        try:
+            endpoint = f"/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages?limit=100"
+            response = w.api_client.do("GET", endpoint)
+            
+            if isinstance(response, dict) and 'messages' in response:
+                messages = response['messages']
+                print(f"INFO: Found {len(messages)} messages using pagination endpoint")
+                return response
+            else:
+                print("INFO: Pagination endpoint didn't return expected format")
+        except Exception as e:
+            print(f"INFO: Pagination endpoint failed: {e}")
+        
+        # Pattern 3: Try conversation details endpoint (might include messages)
+        try:
+            endpoint = f"/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}"
+            response = w.api_client.do("GET", endpoint)
+            
+            if isinstance(response, dict):
+                if 'messages' in response:
+                    messages = response['messages']
+                    print(f"INFO: Found {len(messages)} messages in conversation details")
+                    return response
+                elif 'message_count' in response:
+                    print(f"INFO: Conversation has {response['message_count']} messages but no message list")
+                    # Return a structure indicating we found message count but no list
+                    return {
+                        'messages': [],
+                        'message_count': response['message_count'],
+                        'note': 'Message count available but individual messages not accessible via this endpoint'
+                    }
+                else:
+                    print("INFO: Conversation details endpoint didn't include messages")
+            else:
+                print("INFO: Conversation details endpoint didn't return expected format")
+        except Exception as e:
+            print(f"INFO: Conversation details endpoint failed: {e}")
+        
+        # Pattern 4: Try alternative messages endpoint structure
+        try:
+            endpoint = f"/api/2.0/genie/conversations/{conversation_id}/messages"
+            response = w.api_client.do("GET", endpoint)
+            
+            if isinstance(response, dict) and 'messages' in response:
+                messages = response['messages']
+                print(f"INFO: Found {len(messages)} messages using alternative endpoint")
+                return response
+            else:
+                print("INFO: Alternative messages endpoint didn't return expected format")
+        except Exception as e:
+            print(f"INFO: Alternative messages endpoint failed: {e}")
+        
+        # If all patterns fail, return None
+        print("WARNING: All message listing patterns failed - messages endpoint may not be available")
+        return None
         
     except Exception as e:
         print(f"ERROR: Failed to get messages with Service Principal: {e}")
@@ -248,28 +306,95 @@ def get_genie_messages_obo(space_id, conversation_id, user_token):
         # Clean host URL construction
         host = cfg.host.strip()
         host = host.replace('https://', '').replace('http://', '').strip('/')
-        url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
         
-        response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+        # Try multiple API patterns for listing messages
         
-        if response.status_code == 200:
-            try:
+        # Pattern 1: Standard messages endpoint (what we were trying)
+        try:
+            url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages"
+            response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+            
+            if response.status_code == 200:
                 json_response = response.json()
-                
                 if isinstance(json_response, dict) and 'messages' in json_response:
                     messages = json_response['messages']
-                    print(f"INFO: Found {len(messages)} messages in conversation {conversation_id} using OBO")
+                    print(f"INFO: Found {len(messages)} messages using standard endpoint")
+                    return json_response
                 else:
-                    print("WARNING: OBO messages response missing 'messages' key or not a dict")
-                    
-                return json_response
-                
-            except json.JSONDecodeError as je:
-                print(f"ERROR: Failed to parse JSON response: {je}")
-                return None
-        else:
-            print(f"ERROR: Genie messages OBO request failed: HTTP {response.status_code}")
-            return None
+                    print("INFO: Standard messages endpoint didn't return expected format")
+            else:
+                print(f"INFO: Standard messages endpoint failed: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"INFO: Standard messages endpoint failed: {e}")
+        
+        # Pattern 2: Try with query parameters for pagination/listing
+        try:
+            url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages?limit=100"
+            response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+            
+            if response.status_code == 200:
+                json_response = response.json()
+                if isinstance(json_response, dict) and 'messages' in json_response:
+                    messages = json_response['messages']
+                    print(f"INFO: Found {len(messages)} messages using pagination endpoint")
+                    return json_response
+                else:
+                    print("INFO: Pagination endpoint didn't return expected format")
+            else:
+                print(f"INFO: Pagination endpoint failed: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"INFO: Pagination endpoint failed: {e}")
+        
+        # Pattern 3: Try conversation details endpoint (might include messages)
+        try:
+            url = f"https://{host}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}"
+            response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+            
+            if response.status_code == 200:
+                json_response = response.json()
+                if isinstance(json_response, dict):
+                    if 'messages' in json_response:
+                        messages = json_response['messages']
+                        print(f"INFO: Found {len(messages)} messages in conversation details")
+                        return json_response
+                    elif 'message_count' in json_response:
+                        print(f"INFO: Conversation has {json_response['message_count']} messages but no message list")
+                        # Return a structure indicating we found message count but no list
+                        return {
+                            'messages': [],
+                            'message_count': json_response['message_count'],
+                            'note': 'Message count available but individual messages not accessible via this endpoint'
+                        }
+                    else:
+                        print("INFO: Conversation details endpoint didn't include messages")
+                else:
+                    print("INFO: Conversation details endpoint didn't return expected format")
+            else:
+                print(f"INFO: Conversation details endpoint failed: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"INFO: Conversation details endpoint failed: {e}")
+        
+        # Pattern 4: Try alternative messages endpoint structure
+        try:
+            url = f"https://{host}/api/2.0/genie/conversations/{conversation_id}/messages"
+            response = requests.get(url, headers={"Authorization": f"Bearer {user_token}"})
+            
+            if response.status_code == 200:
+                json_response = response.json()
+                if isinstance(json_response, dict) and 'messages' in json_response:
+                    messages = json_response['messages']
+                    print(f"INFO: Found {len(messages)} messages using alternative endpoint")
+                    return json_response
+                else:
+                    print("INFO: Alternative messages endpoint didn't return expected format")
+            else:
+                print(f"INFO: Alternative messages endpoint failed: HTTP {response.status_code}")
+        except Exception as e:
+            print(f"INFO: Alternative messages endpoint failed: {e}")
+        
+        # If all patterns fail, return None
+        print("WARNING: All message listing patterns failed - messages endpoint may not be available")
+        return None
             
     except Exception as e:
         print(f"ERROR: Failed to get messages with OBO: {e}")
