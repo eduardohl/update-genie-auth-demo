@@ -654,12 +654,7 @@ def update_header_and_warehouses(_):
     # wh_options = warehouse_options
     # wh_value = initial_warehouse_value
 
-    # --- DEBUGGING ---
-    # print("--- Callback update_header_and_warehouses ---")
-    # print(f"Warehouses being sent to dropdown ({len(wh_options)}): {wh_options}")
-    # print(f"Initial value being sent: {wh_value}")
-    # print("---------------------------------------------")
-    # --- END DEBUGGING ---
+
 
     return (
         header_username_display,
