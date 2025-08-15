@@ -61,19 +61,11 @@ def create_genie_list(items, title_key="title", id_key="id"):
     if not items:
         return dmc.Text("No items found", size="sm", c="dimmed")
     
-    print(f"DEBUG: create_genie_list called with {len(items)} items")
-    print(f"DEBUG: First item structure: {items[0] if items else 'None'}")
-    
     list_items = []
-    for i, item in enumerate(items):
-        print(f"DEBUG: Item {i}: {item}")
-        print(f"DEBUG: Available keys: {list(item.keys()) if isinstance(item, dict) else 'Not a dict'}")
-        
+    for item in items:
         # Try different possible key names for ID
         item_id = item.get(id_key) or item.get('space_id') or item.get('_id') or item.get('genie_space_id') or 'Unknown'
         item_title = item.get(title_key) or item.get('name') or item.get('display_name') or 'Untitled'
-        
-        print(f"DEBUG: Using title='{item_title}', id='{item_id}'")
         
         list_items.append(
             dmc.ListItem([
